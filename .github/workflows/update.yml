@@ -1,0 +1,28 @@
+name: Update News
+on:
+  schedule:
+    - cron: '0 0 * * *' # 毎日日本時間9時に実行
+  workflow_dispatch: # 手動実行ボタンを出す設定
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 実行結果を保存するために必要
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 googletrans==4.0.0-rc1
+      - name: Run scraper
+        run: python scraper.py
+      - name: Commit and Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git commit -m "Update news data" || exit 0
+          git push
